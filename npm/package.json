@@ -1,0 +1,32 @@
+{
+  "name": "@orvibo/crm-cli",
+  "version": "0.1.0",
+  "description": "Orvibo CRM command-line tool",
+  "bin": {
+    "crm-cli": "./index.js"
+  },
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "files": [
+    "install.js",
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/orvibo/crm-cli.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=14"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ]
+}

@@ -1,0 +1,4 @@
+crm-cli
+bin/
+node_modules/
+*.exe

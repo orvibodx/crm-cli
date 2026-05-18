@@ -13,8 +13,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "crm-cli",
-	Short: "Orvibo CRM command-line tool",
+	Use:     "crm-cli",
+	Short:   "Orvibo CRM command-line tool",
+	Version: "dev",
 }
 
 func init() {
@@ -27,4 +28,8 @@ func Execute() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+func SetVersion(v string) {
+	rootCmd.Version = v
 }
