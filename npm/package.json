@@ -1,5 +1,5 @@
 {
-  "name": "@orvibo/crm-cli",
+  "name": "@orvibodx/crm-cli",
   "version": "0.1.0",
   "description": "Orvibo CRM command-line tool",
   "bin": {
