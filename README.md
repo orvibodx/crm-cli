@@ -206,7 +206,23 @@ crm-cli customer list --limit 5 --format table --fields customerName,mobile,deal
 | `crm-shared` | 全局约定：认证、实体类型、错误码、兜底 API |
 | `crm-customer` | 客户操作：搜索、详情、筛选、跟进记录、关联数据 |
 
-将 `skills/` 目录下的 SKILL.md 文件复制或软链接到 Claude Code 的 skill 目录即可启用。
+**安装：**
+
+```bash
+# 装全部 skills 到 ~/.claude/skills/
+crm-cli skills install
+
+# 只装指定 skill
+crm-cli skills install crm-customer
+
+# 装到项目级别目录
+crm-cli skills install --target .claude/skills
+
+# 查看内置的 skills
+crm-cli skills list
+```
+
+Skills 已经编译进二进制（`go:embed`），无需联网下载。CLI 升级时 skills 自动跟着更新。
 
 ## 错误码
 
