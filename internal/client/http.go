@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/orvibo/crm-cli/internal/api"
+	"github.com/orvibodx/crm-cli/internal/api"
 )
 
 var envURLs = map[string]string{

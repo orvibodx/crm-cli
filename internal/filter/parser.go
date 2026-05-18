@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/orvibo/crm-cli/internal/api"
+	"github.com/orvibodx/crm-cli/internal/api"
 )
 
 var opToEnum = map[string]int{

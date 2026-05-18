@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	"github.com/spf13/cobra"
-	"github.com/orvibo/crm-cli/internal/client"
+	"github.com/orvibodx/crm-cli/internal/client"
 	"golang.org/x/term"
 )
 

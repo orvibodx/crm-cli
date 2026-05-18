@@ -28,7 +28,7 @@ archives:
 
 release:
   github:
-    owner: orvibo
+    owner: orvibodx
     name: crm-cli
 
 checksum:

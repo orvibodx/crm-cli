@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/orvibo/crm-cli/internal/api"
-	"github.com/orvibo/crm-cli/internal/client"
+	"github.com/orvibodx/crm-cli/internal/api"
+	"github.com/orvibodx/crm-cli/internal/client"
 )
 
 var (

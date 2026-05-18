@@ -1,6 +1,6 @@
 package main
 
-import "github.com/orvibo/crm-cli/cmd"
+import "github.com/orvibodx/crm-cli/cmd"
 
 var version = "dev"
 

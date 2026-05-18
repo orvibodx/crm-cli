@@ -18,7 +18,7 @@ const pkg = require('./package.json')
 const version = pkg.version
 const ext = platform === 'win32' ? '.zip' : '.tar.gz'
 const archiveName = `crm-cli_${version}_${GOOS}_${GOARCH}${ext}`
-const url = `https://github.com/orvibo/crm-cli/releases/download/v${version}/${archiveName}`
+const url = `https://github.com/orvibodx/crm-cli/releases/download/v${version}/${archiveName}`
 
 const binDir = path.join(__dirname, 'bin')
 const binaryName = platform === 'win32' ? 'crm-cli.exe' : 'crm-cli'

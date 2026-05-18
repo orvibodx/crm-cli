@@ -1,4 +1,4 @@
-module github.com/orvibo/crm-cli
+module github.com/orvibodx/crm-cli
 
 go 1.26.2
 
