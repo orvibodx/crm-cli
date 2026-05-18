@@ -42,8 +42,6 @@ jobs:
 
       - name: Publish npm package
         working-directory: npm
-        run: |
-          npm version --no-git-tag-version ${GITHUB_REF_NAME#v}
-          npm publish --access public
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
