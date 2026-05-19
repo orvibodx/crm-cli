@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -79,7 +80,10 @@ func runList(entityName string) error {
 	if createdPreset != "" {
 		timeRange, err := filter.ParseTimePreset(createdPreset, time.Now())
 		if err != nil {
-			// If it's not a preset, treat it as a custom range
+			// Not a preset, validate as custom range
+			if !strings.Contains(createdPreset, ",") {
+				return fmt.Errorf("invalid --created value: %q (expected: today/week/month or start,end)", createdPreset)
+			}
 			timeRange = createdPreset
 		}
 		filterStrs = append(filterStrs, fmt.Sprintf("createTime:range:%s", timeRange))
