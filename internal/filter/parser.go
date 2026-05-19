@@ -3,6 +3,7 @@ package filter
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/orvibodx/crm-cli/internal/api"
 )
@@ -103,4 +104,40 @@ func ParseFilters(filters []string) ([]api.SearchItem, error) {
 		items = append(items, item)
 	}
 	return items, nil
+}
+
+func ParseTimePreset(preset string, now time.Time) (string, error) {
+	switch preset {
+	case "today":
+		dateStr := now.Format("2006-01-02")
+		return fmt.Sprintf("%s,%s", dateStr, dateStr), nil
+
+	case "week":
+		// Get Monday of the current week
+		// time.Weekday: Sunday=0, Monday=1, ..., Saturday=6
+		// We want: Sunday treated as day 7, so Monday is always the start
+		weekday := now.Weekday()
+		var daysBack int
+		if weekday == 0 {
+			// Sunday: go back 6 days to Monday
+			daysBack = 6
+		} else {
+			// Monday-Saturday: go back (weekday - 1) days
+			daysBack = int(weekday) - 1
+		}
+		monday := now.AddDate(0, 0, -daysBack)
+		mondayStr := monday.Format("2006-01-02")
+		todayStr := now.Format("2006-01-02")
+		return fmt.Sprintf("%s,%s", mondayStr, todayStr), nil
+
+	case "month":
+		// Get the 1st of the current month
+		firstDay := now.AddDate(0, 0, -(now.Day() - 1))
+		firstDayStr := firstDay.Format("2006-01-02")
+		todayStr := now.Format("2006-01-02")
+		return fmt.Sprintf("%s,%s", firstDayStr, todayStr), nil
+
+	default:
+		return "", fmt.Errorf("unknown time preset: %s", preset)
+	}
 }
