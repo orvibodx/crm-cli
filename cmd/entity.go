@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/orvibodx/crm-cli/internal/api"
@@ -12,13 +13,14 @@ import (
 )
 
 var (
-	searchStr  string
-	filterStrs []string
-	pageNum    int
-	limitNum   int
-	entityID   string
-	fieldsStr  string
-	dryRun     bool
+	searchStr     string
+	filterStrs    []string
+	pageNum       int
+	limitNum      int
+	entityID      string
+	fieldsStr     string
+	dryRun        bool
+	createdPreset string
 )
 
 func init() {
@@ -41,6 +43,7 @@ func init() {
 		listCmd.Flags().IntVarP(&pageNum, "page", "p", 1, "Page number")
 		listCmd.Flags().IntVarP(&limitNum, "limit", "l", 15, "Page size")
 		listCmd.Flags().StringVar(&fieldsStr, "fields", "", "Output fields (comma-separated)")
+		listCmd.Flags().StringVar(&createdPreset, "created", "", "Filter by creation time: today/week/month or custom range (start,end)")
 
 		detailCmd := &cobra.Command{
 			Use:   "detail",
@@ -70,6 +73,16 @@ func runList(entityName string) error {
 	}
 	if cfg.Token == "" {
 		return fmt.Errorf("not logged in. Run: crm-cli auth login")
+	}
+
+	// Process --created flag
+	if createdPreset != "" {
+		timeRange, err := filter.ParseTimePreset(createdPreset, time.Now())
+		if err != nil {
+			// If it's not a preset, treat it as a custom range
+			timeRange = createdPreset
+		}
+		filterStrs = append(filterStrs, fmt.Sprintf("createTime:range:%s", timeRange))
 	}
 
 	searchItems, err := filter.ParseFilters(filterStrs)
