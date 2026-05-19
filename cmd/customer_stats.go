@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -11,6 +12,8 @@ import (
 	"github.com/orvibodx/crm-cli/internal/api"
 	"github.com/orvibodx/crm-cli/internal/client"
 	"github.com/orvibodx/crm-cli/internal/filter"
+	"github.com/orvibodx/crm-cli/internal/output"
+	"github.com/orvibodx/crm-cli/internal/stats"
 )
 
 var (
@@ -101,7 +104,40 @@ func runCustomerStats(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Printf("Fetched %d customer records\n", len(records))
-	return nil
+
+	if len(records) == 0 {
+		fmt.Println("No records found")
+		return nil
+	}
+
+	// Validate group-by fields
+	if groupBy == "" {
+		return fmt.Errorf("--group-by is required")
+	}
+	groupByFields := strings.Split(groupBy, ",")
+
+	// Aggregate
+	var result interface{}
+	if len(groupByFields) == 1 {
+		result = stats.Aggregate(records, groupByFields, addressLevel, timeGranularity)
+	} else {
+		result = stats.AggregateMulti(records, groupByFields, addressLevel, timeGranularity)
+	}
+
+	// Build output structure
+	outputData := map[string]interface{}{
+		"total":     len(records),
+		"dateRange": map[string]string{"start": strings.Split(timeFilter, ",")[0], "end": strings.Split(timeFilter, ",")[1]},
+		"groupBy":   groupByFields,
+		"data":      result,
+	}
+
+	// Output
+	if format == "json" {
+		return output.PrintJSON(outputData)
+	} else {
+		return printStatsTable(outputData, groupByFields)
+	}
 }
 
 func fetchAllCustomers(cfg *client.Config, searchItems []api.SearchItem) ([]map[string]interface{}, error) {
@@ -148,4 +184,36 @@ func fetchAllCustomers(cfg *client.Config, searchItems []api.SearchItem) ([]map[
 	}
 
 	return allRecords, nil
+}
+
+func printStatsTable(data map[string]interface{}, groupByFields []string) error {
+	fmt.Printf("Total: %v customers (%s to %s)\n\n",
+		data["total"],
+		data["dateRange"].(map[string]string)["start"],
+		data["dateRange"].(map[string]string)["end"])
+
+	if len(groupByFields) == 1 {
+		// Single dimension: simple table
+		counts := data["data"].(map[string]int)
+		fmt.Printf("%s | count\n", groupByFields[0])
+		fmt.Println(strings.Repeat("-", 40))
+		for key, count := range counts {
+			fmt.Printf("%s | %d\n", key, count)
+		}
+	} else {
+		// Multi dimension: use tablewriter
+		items := data["data"].([]map[string]interface{})
+		headers := append(groupByFields, "count")
+		var rows []map[string]interface{}
+		for _, item := range items {
+			row := make(map[string]interface{})
+			for _, field := range groupByFields {
+				row[field] = item[field]
+			}
+			row["count"] = item["count"]
+			rows = append(rows, row)
+		}
+		return output.PrintTable(rows, strings.Join(headers, ","))
+	}
+	return nil
 }
