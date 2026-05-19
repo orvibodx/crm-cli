@@ -1,6 +1,6 @@
 {
   "name": "@orvibodx/crm-cli",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Orvibo CRM command-line tool",
   "bin": {
     "crm-cli": "./index.js"
