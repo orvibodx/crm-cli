@@ -106,7 +106,36 @@ crm-cli <entity> detail --id <ID>
 | `--page` | `-p` | 页码 | 1 |
 | `--limit` | `-l` | 每页条数 | 15 |
 | `--fields` | | 指定输出字段（逗号分隔） | |
+| `--created` | | 创建时间筛选：`today/week/month/start,end` | |
 | `--format` | | 输出格式：`json` 或 `table` | json |
+
+### 客户统计
+
+```bash
+# 按来源统计本月新增客户
+crm-cli customer stats --date-preset month --group-by source
+
+# 按来源 x 客户级别交叉分析
+crm-cli customer stats --date-preset month --group-by source,customerLevel
+
+# 按城市统计地域分布
+crm-cli customer stats --date-preset month --group-by address --address-level city
+
+# 按天统计新增趋势
+crm-cli customer stats --date-preset month --group-by createTime --time-granularity day
+```
+
+**stats 可用参数：**
+
+| 参数 | 说明 | 默认值 |
+|---|---|---|
+| `--date-preset` | 时间预设：`today/week/month` | |
+| `--date-range` | 日期范围：`start,end`（YYYY-MM-DD） | |
+| `--group-by` | 分组字段（逗号分隔，支持多维度） | 必填 |
+| `--address-level` | 地址粒度：`province/city/district` | |
+| `--time-granularity` | 时间粒度：`day/week/month` | |
+| `--filter` | 高级筛选，可重复 | |
+| `--format` | 输出格式：`json` 或 `table` | json |
 
 ### 跟进记录
 
@@ -213,6 +242,7 @@ crm-cli customer list --limit 5 --format table --fields customerName,mobile,deal
 |---|---|
 | `crm-shared` | 全局约定：认证、实体类型、错误码、兜底 API |
 | `crm-customer` | 客户操作：搜索、详情、筛选、跟进记录、关联数据 |
+| `crm-analytics` | 数据分析：渠道分析、增长分析、客户洞察、跟进追踪 |
 
 **安装：**
 
