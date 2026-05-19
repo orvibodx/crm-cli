@@ -24,10 +24,18 @@ func init() {
 }
 
 func Execute() {
+	// Register any deferred commands after all init functions have run
+	registerDeferredCommands()
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
+
+func registerDeferredCommands() {
+	// This will be called after all package init functions have completed
+	// allowing customer_stats to find the customer command created by entity.go
+	RegisterStatsCommand()
 }
 
 func SetVersion(v string) {
