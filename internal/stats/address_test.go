@@ -53,6 +53,24 @@ func TestParseAddress(t *testing.T) {
 			level:    "city",
 			expected: "(unknown)",
 		},
+		{
+			name:     "autonomous region - inner mongolia",
+			address:  "内蒙古自治区呼和浩特市",
+			level:    "city",
+			expected: "呼和浩特",
+		},
+		{
+			name:     "autonomous region - xinjiang",
+			address:  "新疆维吾尔自治区乌鲁木齐市",
+			level:    "city",
+			expected: "乌鲁木齐",
+		},
+		{
+			name:     "autonomous region - guangxi",
+			address:  "广西壮族自治区南宁市",
+			level:    "city",
+			expected: "南宁",
+		},
 	}
 
 	for _, tt := range tests {

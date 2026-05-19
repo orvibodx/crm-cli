@@ -35,12 +35,22 @@ func parseProvince(address string) string {
 // parseCity extracts the city from a Chinese address.
 func parseCity(address string) string {
 	// Match city patterns: text followed by 市
-	pattern := `(?:省|自治区|特别行政区)?([^省市自治区特别行政区]*?市)`
+	// First, try to match after province/region suffix
+	pattern := `(?:省|自治区|特别行政区)(.+?市)`
 	re := regexp.MustCompile(pattern)
 	matches := re.FindStringSubmatch(address)
 	if len(matches) > 1 {
 		return trimSuffix(matches[1], "市")
 	}
+
+	// If no province/region suffix found, try to match city at the start
+	pattern = `^(.+?市)`
+	re = regexp.MustCompile(pattern)
+	matches = re.FindStringSubmatch(address)
+	if len(matches) > 1 {
+		return trimSuffix(matches[1], "市")
+	}
+
 	return "(unknown)"
 }
 
