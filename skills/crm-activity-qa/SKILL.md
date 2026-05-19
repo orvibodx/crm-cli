@@ -1,6 +1,6 @@
 ---
 name: crm-activity-qa
-description: 客户跟进记录批量获取与质检。分析今日（或指定时间范围）新增客户的跟进情况，评估跟进质量。
+description: 客户跟进质量分析。分析指定时间范围新增客户的跟进情况，评估跟进质量。用于回答"本周/本月新增客户的跟进情况如何？"等问题。
 requires:
   bins: ["crm-cli"]
   skills: ["crm-shared"]
@@ -10,40 +10,55 @@ requires:
 
 先确认认证状态（见 ../crm-shared/SKILL.md）。如果 `crm-cli auth whoami` 报错，先登录。
 
-## 场景：今日新增客户跟进质量分析
+## 场景：客户跟进质量分析
 
-**业务目标：** 分析今日新增客户的跟进记录，评估跟进质量，发现未跟进或跟进不足的客户。
+**业务目标：** 分析指定时间范围内新增客户的跟进记录，评估跟进质量，发现未跟进或跟进不足的客户。
+
+**适用问题：**
+- "今天/本周/本月新增客户有哪些？跟进情况如何？"
+- "跟进质量怎么样？有哪些客户没跟进？"
+- "本周新增客户的首次响应时间是多少？"
 
 ## 工作流程
 
-### Step 1: 获取今日新增客户列表
+### Step 1: 根据用户意图确定时间范围
+
+用户可能说"今天"、"本周"、"本月"，需要解析为 `--created` 参数：
+
+| 用户说法 | 参数值 |
+|----------|--------|
+| 今天、今日 | `today` |
+| 本周、这周 | `week` |
+| 本月、这个月 | `month` |
+| 指定日期范围 | `start,end` 格式 |
+
+### Step 2: 获取新增客户列表
 
 ```bash
-# 获取今日新增客户（JSON 格式，方便解析）
-crm-cli customer list --created today --format json --limit 100
+# 获取新增客户（JSON 格式）
+# limit 根据实际情况设置，不超过 100
+crm-cli customer list --created <time> --format json --limit <N>
 ```
 
-AI 需要从响应中提取客户 ID 和基本信息（customerId, customerName, ownerUserName, createTime）。
+**说明：** `--limit` 根据用户问题范围设置：
+- 分析少量客户：`--limit 10-20`
+- 批量分析：`--limit 50-100`
+- 不建议超过 100 条，应按优先级（如未跟进客户）优先处理
 
-### Step 2: 批量获取跟进记录
+### Step 3: 批量获取跟进记录
 
-对于 Step 1 获取到的每个客户 ID，使用 shell 并行化批量获取跟进记录：
+对于获取到的客户，逐个获取跟进记录：
 
 ```bash
-# 并行获取多个客户的跟进记录（建议并发数 5-10）
-crm-cli activity list --type customer --id <customerId1> --format json &
-crm-cli activity list --type customer --id <customerId2> --format json &
-crm-cli activity list --type customer --id <customerId3> --format json &
-# ... 更多并行请求
-wait
+# 逐个获取（串行或小批量并行）
+crm-cli activity list --type customer --id <customerId> --format json --limit 10
 ```
 
-**并发控制建议：**
-- 每次并行请求控制在 5-10 个
-- 如果客户数超过 10 个，分批处理
-- 每批之间等待 1-2 秒，避免接口限流
+**并发建议：**
+- 并行数建议 3-5 个
+- 每次并行请求后稍作停顿，避免限流
 
-### Step 3: 分析跟进情况
+### Step 4: 分析跟进情况
 
 对于每个客户，分析其跟进记录：
 
@@ -61,85 +76,49 @@ wait
 - **一般：** 24-48小时内跟进
 - **不合格：** 超过48小时未跟进，或无跟进记录
 
-### Step 4: 输出质检报告
+### Step 5: 输出质检报告
 
 汇总分析结果，输出报告：
 
 ```
-【今日新增客户跟进质检报告】
+【客户跟进质检报告】
 
-统计时间：2026-05-19
+统计时间范围：<时间范围>
+统计客户数：<N> 位
 
 【总体情况】
-- 今日新增客户：12 位
-- 已跟进：10 位（83%）
-- 未跟进：2 位（17%）
+- 已跟进：<N> 位（<X>%）
+- 未跟进：<N> 位（<X>%）
 
 【跟进质量分布】
-- 优秀：3 位（25%）
-- 良好：5 位（42%）
-- 一般：2 位（17%）
-- 不合格：2 位（17%）
+- 优秀：<N> 位
+- 良好：<N> 位
+- 一般：<N> 位
+- 不合格：<N> 位
 
-【未跟进客户】
-1. 张三（ID: xxx）- 创建时间 10:30，尚未跟进）
-2. 李四（ID: xxx）- 创建时间 14:20，尚未跟进）
-
-【跟进超时预警】（超过24小时未跟进）
-1. 王五（ID: xxx）- 创建时间 05-18 10:00，最后跟进 05-18 11:00，已超时 22小时）
+【未跟进/超时客户列表】
+1. <客户名>（ID: <id>）- <状态说明>
 
 【改进建议】
-1. 2 位客户需立即跟进（未跟进）
-2. 建立 2 小时首响机制，提升响应及时性
-3. 对超时客户发送提醒通知
-```
-
-## 场景变体
-
-### 按时间范围分析
-
-```bash
-# 获取本周新增客户
-crm-cli customer list --created week --format json --limit 100
-
-# 获取本月新增客户
-crm-cli customer list --created month --format json --limit 100
-```
-
-### 按负责人分析
-
-```bash
-# 筛选特定负责人的客户
-crm-cli customer list --filter 'ownerUserName:eq:张三' --created today --format json
-```
-
-### 指定客户批量查询
-
-如果有特定客户 ID 列表，直接批量查询：
-
-```bash
-# 假设 customerIds 是逗号分隔的 ID 列表
-# 使用 xargs 并行查询（最多5个并发）
-echo "id1,id2,id3,id4,id5" | tr ',' '\n' | xargs -P5 -I{} \
-  sh -c 'crm-cli activity list --type customer --id {} --format json'
+1. ...
 ```
 
 ## 注意事项
 
-- **数据量限制：** 单次 `customer list --created` 最多返回 1000 条（受 API 限制）
-- **接口限流：** 并行请求时建议控制在 5-10 个，避免触发限流
-- **跟进记录分页：** 如果单个客户的跟进记录超过 15 条，需翻页获取完整记录
-- **隐私考虑：** 跟进内容可能包含敏感信息，分析时注意数据保护
+- **limit 设置：** 单次不超过 100 条，优先处理重要客户
+- **接口限流：** 并行请求时建议 3-5 个一组，稍作停顿
+- **时间范围：** 以用户问题的实际时间范围为准，不局限"今天"
+- **隐私：** 跟进内容可能包含敏感信息，注意数据保护
 
 ## 相关命令
 
 ```bash
-# 查看客户详情
-crm-cli customer detail --id <customerId>
+# 获取客户列表
+crm-cli customer list --created today --format json
 
-# 查看跟进记录
-crm-cli activity list --type customer --id <customerId>
+# 获取特定客户跟进记录
+crm-cli activity list --type customer --id <id> --format json
 
-# 查看负责人列表
-crm-cli customer list --created today --format json | jq '.list[] | .ownerUserName' | sort | uniq -c
+# 按负责人筛选
+crm-cli customer list --filter 'ownerUserName:eq:张三' --created week --format json
 ```

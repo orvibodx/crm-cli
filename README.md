@@ -242,7 +242,8 @@ crm-cli customer list --limit 5 --format table --fields customerName,mobile,deal
 |---|---|
 | `crm-shared` | 全局约定：认证、实体类型、错误码、兜底 API |
 | `crm-customer` | 客户操作：搜索、详情、筛选、跟进记录、关联数据 |
-| `crm-analytics` | 数据分析：渠道分析、增长分析、客户洞察、跟进追踪 |
+| `crm-analytics` | 数据分析：渠道分析、增长分析、客户洞察 |
+| `crm-activity-qa` | 跟进质检：批量获取跟进记录，分析跟进质量 |
 
 **安装：**
 
