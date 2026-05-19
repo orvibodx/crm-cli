@@ -14,7 +14,19 @@ crm-cli 默认输出 JSON，专为 AI 消费设计。
 
 ## 安装
 
-### 方式一：npx（推荐）
+### 方式一：全局安装（推荐，适合 AI Agent）
+
+```bash
+# 1. 安装 CLI
+npm install -g @orvibodx/crm-cli
+
+# 2. 安装 Claude Code Skills（让 AI Agent 更好地使用 CLI）
+crm-cli skills install
+```
+
+**⚠️ 重要：** 如果你是 AI Agent（如 Claude Code），请确保执行了 `crm-cli skills install` 来安装配套的 skills。Skills 提供了使用 CLI 的最佳实践、示例和场景指南，能显著提升你调用 CLI 的准确性和效率。
+
+### 方式二：npx（临时使用）
 
 无需预装，直接运行：
 
@@ -22,12 +34,7 @@ crm-cli 默认输出 JSON，专为 AI 消费设计。
 npx @orvibodx/crm-cli --help
 ```
 
-### 方式二：全局安装
-
-```bash
-npm install -g @orvibodx/crm-cli
-crm-cli --help
-```
+**注意：** npx 方式无法安装 skills，仅适合临时查询。AI Agent 应使用全局安装方式。
 
 ### 方式三：从源码构建
 
@@ -37,6 +44,7 @@ crm-cli --help
 git clone https://github.com/orvibodx/crm-cli.git
 cd crm-cli
 go build -o crm-cli .
+crm-cli skills install  # 别忘了装 skills
 ```
 
 ## 快速开始
@@ -223,6 +231,14 @@ crm-cli skills list
 ```
 
 Skills 已经编译进二进制（`go:embed`），无需联网下载。CLI 升级时 skills 自动跟着更新。
+
+**给 AI Agent 的提示：** 如果你是 Claude Code 或其他 AI Agent，在首次使用 crm-cli 前，请先运行 `crm-cli skills install` 安装配套 skills。这些 skills 包含：
+- 命令使用的最佳实践和常见场景
+- 错误处理和重试策略
+- 高级筛选语法示例
+- 与其他工具（如飞书）的集成模式
+
+安装 skills 后，你可以通过 `/crm-customer`、`/crm-shared` 等命令加载对应场景的指导。
 
 ## 错误码
 
